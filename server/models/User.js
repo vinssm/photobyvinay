@@ -1,8 +1,8 @@
-const { Schema, model } = require('mongoose');
-const bcrypt = require('bcrypt');
+const { Schema, model } = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 // import schema from Comment.js
-const commentSchema = require('./Comment');
+const commentSchema = require("./Comment");
 
 const userSchema = new Schema(
   {
@@ -15,7 +15,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      match: [/.+@.+\..+/, 'Must use a valid email address'],
+      match: [/.+@.+\..+/, "Must use a valid email address"],
     },
     password: {
       type: String,
@@ -29,12 +29,12 @@ const userSchema = new Schema(
     toJSON: {
       virtuals: true,
     },
-  }
+  },
 );
 
 // hash user password
-userSchema.pre('save', async function (next) {
-  if (this.isNew || this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("password")) {
     const saltRounds = 10;
     this.password = await bcrypt.hash(this.password, saltRounds);
   }
@@ -48,10 +48,10 @@ userSchema.methods.isCorrectPassword = async function (password) {
 };
 
 // when we query a user, we'll also get another field called `commentCount` with the number of saved comments we have
-userSchema.virtual('commentCount').get(function () {
+userSchema.virtual("commentCount").get(function () {
   return this.savedComments.length;
 });
 
-const User = model('User', userSchema);
+const User = model("User", userSchema);
 
 module.exports = User;

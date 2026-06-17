@@ -1,10 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/photobyvinay', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
-});
+// Connect without the deprecated configuration options object
+mongoose.connect();
 
 module.exports = mongoose.connection;
