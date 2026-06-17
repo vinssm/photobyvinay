@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://vinssm.github.io/photo-by-vinay",
+  "homepage": "https://vinssm.github.io/photobyvinay/",
   "proxy": "http://localhost:3001/",
   "dependencies": {
     "@apollo/client": "^3.5.10",
@@ -31,6 +31,7 @@
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts --openssl-legacy-provider build",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
