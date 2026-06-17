@@ -1,0 +1,6 @@
+plugins:
+  - jekyll-redirect-from
+
+# Disable Jekyll processing for certain file types
+include: [".well-known"]
+exclude: ["node_modules"]
