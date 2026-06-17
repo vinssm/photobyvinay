@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vinssm/photobyvinay.git"
+    "url": "git+https://vinssm.github.io/photobyvinay/"
   },
   "keywords": [],
   "author": "Vinay",
@@ -38,7 +38,7 @@
     "gh-pages": "^6.3.0"
   },
   "bugs": {
-    "url": "https://github.com/vinssm/photo-by-vinay/issues"
+    "url": " https://vinssm.github.io/photobyvinay/issues"
   },
-  "homepage": "https://github.com/vinssm/photo-by-vinay#readme"
+  "homepage": "https://vinssm.github.io/photobyvinay/"
 }
