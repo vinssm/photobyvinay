@@ -1,7 +1,7 @@
 {
   "name": "photobyvinay",
   "version": "1.0.0",
-  "description": "Photo-by-Vinay",
+  "description": "photobyvinay",
   "main": "server/server.js",
   "engines": {
     "node": "14.x"
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vinssm/photo-by-vinay.git"
+    "url": "git+https://github.com/vinssm/photobyvinay.git"
   },
   "keywords": [],
   "author": "Vinay",
@@ -34,7 +34,8 @@
     "web-vitals": "^5.3.0"
   },
   "devDependencies": {
-    "concurrently": "^5.3.0"
+    "concurrently": "^5.3.0",
+    "gh-pages": "^6.3.0"
   },
   "bugs": {
     "url": "https://github.com/vinssm/photo-by-vinay/issues"

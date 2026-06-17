@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://vinssm.github.io/photobyvinay/",
+  "homepage": "https://vinssm.github.io/photoapp",
   "proxy": "http://localhost:3001/",
   "dependencies": {
     "@apollo/client": "^3.5.10",
