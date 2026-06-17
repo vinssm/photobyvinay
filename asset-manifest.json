@@ -1,0 +1,39 @@
+{
+  "files": {
+    "main.css": "/photo-by-vinay/static/css/main.01cb56aa.chunk.css",
+    "main.js": "/photo-by-vinay/static/js/main.3a0318c4.chunk.js",
+    "main.js.map": "/photo-by-vinay/static/js/main.3a0318c4.chunk.js.map",
+    "runtime-main.js": "/photo-by-vinay/static/js/runtime-main.2065541f.js",
+    "runtime-main.js.map": "/photo-by-vinay/static/js/runtime-main.2065541f.js.map",
+    "static/css/2.89f7df41.chunk.css": "/photo-by-vinay/static/css/2.89f7df41.chunk.css",
+    "static/js/2.c7795cd6.chunk.js": "/photo-by-vinay/static/js/2.c7795cd6.chunk.js",
+    "static/js/2.c7795cd6.chunk.js.map": "/photo-by-vinay/static/js/2.c7795cd6.chunk.js.map",
+    "index.html": "/photo-by-vinay/index.html",
+    "precache-manifest.359d624b4a2cea1aad0d2ea5531ca0d7.js": "/photo-by-vinay/precache-manifest.359d624b4a2cea1aad0d2ea5531ca0d7.js",
+    "service-worker.js": "/photo-by-vinay/service-worker.js",
+    "static/css/2.89f7df41.chunk.css.map": "/photo-by-vinay/static/css/2.89f7df41.chunk.css.map",
+    "static/css/main.01cb56aa.chunk.css.map": "/photo-by-vinay/static/css/main.01cb56aa.chunk.css.map",
+    "static/js/2.c7795cd6.chunk.js.LICENSE.txt": "/photo-by-vinay/static/js/2.c7795cd6.chunk.js.LICENSE.txt",
+    "static/media/image1.jpg": "/photo-by-vinay/static/media/image1.8a06fd7f.jpg",
+    "static/media/image10.jpg": "/photo-by-vinay/static/media/image10.18610184.jpg",
+    "static/media/image11.jpg": "/photo-by-vinay/static/media/image11.e5a9acdf.jpg",
+    "static/media/image12.jpg": "/photo-by-vinay/static/media/image12.7948da58.jpg",
+    "static/media/image2.jpg": "/photo-by-vinay/static/media/image2.14952cac.jpg",
+    "static/media/image3.jpg": "/photo-by-vinay/static/media/image3.d7f121cf.jpg",
+    "static/media/image4.jpg": "/photo-by-vinay/static/media/image4.bff93489.jpg",
+    "static/media/image5.jpg": "/photo-by-vinay/static/media/image5.4beb1c41.jpg",
+    "static/media/image6.jpg": "/photo-by-vinay/static/media/image6.fd0ee25c.jpg",
+    "static/media/image7.jpg": "/photo-by-vinay/static/media/image7.8227bf0a.jpg",
+    "static/media/image8.jpg": "/photo-by-vinay/static/media/image8.6897f62f.jpg",
+    "static/media/image9.jpg": "/photo-by-vinay/static/media/image9.5451ac14.jpg",
+    "static/media/profile.jpg": "/photo-by-vinay/static/media/profile.40861eb0.jpg",
+    "static/media/vinay.pdf": "/photo-by-vinay/static/media/vinay.2e7197c8.pdf"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2065541f.js",
+    "static/css/2.89f7df41.chunk.css",
+    "static/js/2.c7795cd6.chunk.js",
+    "static/css/main.01cb56aa.chunk.css",
+    "static/js/main.3a0318c4.chunk.js"
+  ]
+}
