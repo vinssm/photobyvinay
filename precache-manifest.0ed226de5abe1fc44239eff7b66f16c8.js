@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f84417833bb06364f89b29dbf4554476",
+    "revision": "d201639da3c602784243f9901d8c3260",
     "url": "/photobyvinay/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/photobyvinay/static/css/2.89f7df41.chunk.css"
   },
   {
-    "revision": "76e5bc7b8eab82955898",
+    "revision": "30b5fd43385cd3f4436b",
     "url": "/photobyvinay/static/css/main.01cb56aa.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/photobyvinay/static/js/2.c7795cd6.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "76e5bc7b8eab82955898",
-    "url": "/photobyvinay/static/js/main.3a0318c4.chunk.js"
+    "revision": "30b5fd43385cd3f4436b",
+    "url": "/photobyvinay/static/js/main.76a35e85.chunk.js"
   },
   {
     "revision": "361a51869ad6d50e271b",

@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/photobyvinay/static/css/main.01cb56aa.chunk.css",
-    "main.js": "/photobyvinay/static/js/main.3a0318c4.chunk.js",
-    "main.js.map": "/photobyvinay/static/js/main.3a0318c4.chunk.js.map",
+    "main.js": "/photobyvinay/static/js/main.76a35e85.chunk.js",
+    "main.js.map": "/photobyvinay/static/js/main.76a35e85.chunk.js.map",
     "runtime-main.js": "/photobyvinay/static/js/runtime-main.b3ec7309.js",
     "runtime-main.js.map": "/photobyvinay/static/js/runtime-main.b3ec7309.js.map",
     "static/css/2.89f7df41.chunk.css": "/photobyvinay/static/css/2.89f7df41.chunk.css",
     "static/js/2.c7795cd6.chunk.js": "/photobyvinay/static/js/2.c7795cd6.chunk.js",
     "static/js/2.c7795cd6.chunk.js.map": "/photobyvinay/static/js/2.c7795cd6.chunk.js.map",
     "index.html": "/photobyvinay/index.html",
-    "precache-manifest.00cd52f7e538dac167918a6673fc7884.js": "/photobyvinay/precache-manifest.00cd52f7e538dac167918a6673fc7884.js",
+    "precache-manifest.0ed226de5abe1fc44239eff7b66f16c8.js": "/photobyvinay/precache-manifest.0ed226de5abe1fc44239eff7b66f16c8.js",
     "service-worker.js": "/photobyvinay/service-worker.js",
     "static/css/2.89f7df41.chunk.css.map": "/photobyvinay/static/css/2.89f7df41.chunk.css.map",
     "static/css/main.01cb56aa.chunk.css.map": "/photobyvinay/static/css/main.01cb56aa.chunk.css.map",
@@ -34,6 +34,6 @@
     "static/css/2.89f7df41.chunk.css",
     "static/js/2.c7795cd6.chunk.js",
     "static/css/main.01cb56aa.chunk.css",
-    "static/js/main.3a0318c4.chunk.js"
+    "static/js/main.76a35e85.chunk.js"
   ]
 }
