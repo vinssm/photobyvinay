@@ -39,13 +39,13 @@ const startApolloServer = async () => {
   // 4. Serve up static assets
   app.use("/images", express.static(path.join(__dirname, "../client/images")));
 
-  // If in production, serve client/build as static assets
+  // If in production, serve Vite build output as static assets
   if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../client/build")));
+    app.use(express.static(path.join(__dirname, "../client/dist")));
 
     // Catch-all route for Single Page Applications (SPA)
     app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "../client/build/index.html"));
+      res.sendFile(path.join(__dirname, "../client/dist/index.html"));
     });
   }
 
