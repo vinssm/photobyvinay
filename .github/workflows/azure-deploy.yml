@@ -53,17 +53,19 @@ jobs:
 
       - name: Deploy to Azure Web App
         id: deploy
-        # FIX 2: env block was missing entirely in deploy-main — PUBLISH_PROFILE was never set
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
         run: |
-          # FIX 3: write heredoc to a temp file to avoid subshell/quoting issues
-          cat > /tmp/extract_creds.py << 'EOF'
+          # Extract credentials from publish profile using Python
+          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
           import xml.etree.ElementTree as ET
-          import os, sys
+          import sys
 
-          profile_xml = os.environ['PUBLISH_PROFILE']
-          root = ET.fromstring(profile_xml)
+          if len(sys.argv) < 2:
+              print("Error: No publish profile provided")
+              sys.exit(1)
+
+          profile_xml = sys.argv[1]
+          try:
+              root = ET.fromstring(profile_xml)
 
           for profile in root.findall('.//publishProfile'):
               username = profile.get('userName')
@@ -71,21 +73,26 @@ jobs:
               if username and password:
                   print(f"{username}:{password}")
                   sys.exit(0)
+          except Exception as e:
+              print(f"Error parsing XML: {e}")
+              sys.exit(1)
+          EOFSCRIPT
 
-          sys.exit(1)
-          EOF
-
-          creds=$(python3 /tmp/extract_creds.py)
+          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}")
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            exit 1
+          fi
 
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials"
+            echo "Error: Failed to parse credentials"
             exit 1
           fi
 
-          # FIX 4: capture HTTP status code and fail the step if deploy didn't return 200
+          # Deploy using Kudu REST API with HTTP status checking
           HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
             -X POST -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/zip" \
@@ -126,37 +133,43 @@ jobs:
         run: zip -r bio-release.zip . --exclude "*.git*"
 
       - name: Deploy to Azure Web App
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
         run: |
-          cat > /tmp/extract_creds.py << 'EOF'
+          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
           import xml.etree.ElementTree as ET
-          import os, sys
+          import sys
 
-          profile_xml = os.environ['PUBLISH_PROFILE']
-          root = ET.fromstring(profile_xml)
+          if len(sys.argv) < 2:
+              print("Error: No publish profile provided")
+              sys.exit(1)
 
-          for profile in root.findall('.//publishProfile'):
-              username = profile.get('userName')
-              password = profile.get('userPWD')
-              if username and password:
-                  print(f"{username}:{password}")
-                  sys.exit(0)
+          profile_xml = sys.argv[1]
+          try:
+              root = ET.fromstring(profile_xml)
+              for profile in root.findall('.//publishProfile'):
+                  username = profile.get('userName')
+                  password = profile.get('userPWD')
+                  if username and password:
+                      print(f"{username}:{password}")
+                      sys.exit(0)
+          except Exception as e:
+              print(f"Error parsing XML: {e}")
+              sys.exit(1)
+          EOFSCRIPT
 
-          sys.exit(1)
-          EOF
-
-          creds=$(python3 /tmp/extract_creds.py)
+          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}")
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            exit 1
+          fi
 
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials"
+            echo "Error: Failed to parse credentials"
             exit 1
           fi
 
-          # FIX 5: zip is created inside services/bio-service/ so path must be relative to that dir
           HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
             -X POST -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/zip" \
@@ -197,33 +210,40 @@ jobs:
         run: zip -r projects-release.zip . --exclude "*.git*" --exclude "venv/*" --exclude "__pycache__/*"
 
       - name: Deploy to Azure Web App
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
         run: |
-          cat > /tmp/extract_creds.py << 'EOF'
+          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
           import xml.etree.ElementTree as ET
-          import os, sys
+          import sys
 
-          profile_xml = os.environ['PUBLISH_PROFILE']
-          root = ET.fromstring(profile_xml)
+          if len(sys.argv) < 2:
+              print("Error: No publish profile provided")
+              sys.exit(1)
 
-          for profile in root.findall('.//publishProfile'):
-              username = profile.get('userName')
-              password = profile.get('userPWD')
-              if username and password:
-                  print(f"{username}:{password}")
-                  sys.exit(0)
+          profile_xml = sys.argv[1]
+          try:
+              root = ET.fromstring(profile_xml)
+              for profile in root.findall('.//publishProfile'):
+                  username = profile.get('userName')
+                  password = profile.get('userPWD')
+                  if username and password:
+                      print(f"{username}:{password}")
+                      sys.exit(0)
+          except Exception as e:
+              print(f"Error parsing XML: {e}")
+              sys.exit(1)
+          EOFSCRIPT
 
-          sys.exit(1)
-          EOF
-
-          creds=$(python3 /tmp/extract_creds.py)
+          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}")
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            exit 1
+          fi
 
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials"
+            echo "Error: Failed to parse credentials"
             exit 1
           fi
 
