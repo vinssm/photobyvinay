@@ -1,0 +1,123 @@
+﻿name: Deploy All Services to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  PYTHON_VERSION: "3.11"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# JOB 1 — Build & Deploy main app (Express GraphQL + React build)
+# Azure App Service name stored in: vars.AZURE_MAIN_APP_NAME
+# Publish profile stored in:        secrets.AZURE_MAIN_PUBLISH_PROFILE
+# ────────────────────────────────────────────────────────────────────────────────
+jobs:
+  deploy-main:
+    name: Main App (Express + React)
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm install --omit=dev
+
+      - name: Install client dependencies and build
+        working-directory: client
+        run: |
+          npm install
+          npm run build
+
+      - name: Create deployment zip (excludes dev files)
+        run: |
+          zip -r main-release.zip . \
+            --exclude "*.git*" \
+            --exclude ".github/*" \
+            --exclude "client/src/*" \
+            --exclude "client/public/*" \
+            --exclude "client/node_modules/*" \
+            --exclude "services/*"
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_MAIN_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
+          package: main-release.zip
+
+# ────────────────────────────────────────────────────────────────────────────────
+# JOB 2 — Deploy Bio Service (Node.js/Express)
+# Azure App Service name stored in: vars.AZURE_BIO_APP_NAME
+# Publish profile stored in:        secrets.AZURE_BIO_PUBLISH_PROFILE
+# ────────────────────────────────────────────────────────────────────────────────
+  deploy-bio-service:
+    name: Bio Service (Node.js)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install bio service dependencies
+        working-directory: services/bio-service
+        run: npm install --omit=dev
+
+      - name: Create deployment zip
+        working-directory: services/bio-service
+        run: zip -r bio-release.zip . --exclude "*.git*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_BIO_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
+          package: services/bio-service/bio-release.zip
+
+# ────────────────────────────────────────────────────────────────────────────────
+# JOB 3 — Deploy Project Service (Python FastAPI)
+# Azure App Service name stored in: vars.AZURE_PROJECTS_APP_NAME
+# Publish profile stored in:        secrets.AZURE_PROJECTS_PUBLISH_PROFILE
+# ────────────────────────────────────────────────────────────────────────────────
+  deploy-project-service:
+    name: Project Service (Python FastAPI)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        working-directory: services/project-service
+        run: pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+
+      - name: Create deployment zip
+        working-directory: services/project-service
+        run: zip -r projects-release.zip . --exclude "*.git*" --exclude "venv/*" --exclude "__pycache__/*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_PROJECTS_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
+          package: services/project-service/projects-release.zip

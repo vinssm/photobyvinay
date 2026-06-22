@@ -1,0 +1,152 @@
+﻿const resume = {
+  bio: {
+    name: "Vinay Vallabhaneni",
+    title: "Software Engineer II | DevOps | Full Stack",
+    location: "Charlotte, NC",
+    email: "vallab.v@gmail.com",
+    phone: "704-791-4847",
+    github: "https://github.com/vinssm",
+    summary:
+      "10+ years of IT experience as a Software Engineer specializing in Software Configuration Management, full-stack development, and DevOps. Strong expertise in React, Angular, GraphQL, CI/CD pipelines, Jenkins, Docker, and AWS. Proven ability to lead cross-functional teams, manage production releases, and deliver scalable solutions in Agile environments at enterprise scale.",
+  },
+
+  skills: [
+    { category: "Frontend", items: ["React", "Angular", "JavaScript (ES6+)", "JSX", "HTML5/CSS3", "Bootstrap", "jQuery"] },
+    { category: "Backend", items: ["Node.js", "GraphQL", "REST APIs", "Maven", "Apache Ant", "Gradle"] },
+    { category: "DevOps & CI/CD", items: ["Jenkins", "GitHub Actions", "Docker", "CI/CD Pipelines", "MSBuild", "Groovy Scripts"] },
+    { category: "Cloud & Infrastructure", items: ["AWS (EC2, IAM, S3, VPC, SNS)", "Azure", "WebLogic", "Apache", "Nginx", "IIS"] },
+    { category: "SCM & Tools", items: ["Git", "SVN", "JIRA", "Confluence", "Artifactory", "JFrog", "Nexus", "Qualys VM"] },
+    { category: "Languages & Scripting", items: ["JavaScript", "Python", "Bash", "Shell", "Groovy", "XML/XSD"] },
+  ],
+
+  jobs: [
+    {
+      id: 1,
+      company: "Bank of America",
+      title: "Software Engineer II",
+      start: "Nov 2021",
+      end: "Present",
+      location: "Charlotte, NC",
+      highlights: [
+        "Partnered with product and design teams to create seamless workflows guiding users through critical financial decisions (loans, mortgages, credit services)",
+        "Collaborated with back-end teams to design scalable APIs and integrate GraphQL for real-time data retrieval, powering personalized user journeys",
+        "Built responsive React UI components supporting millions of transactions with cross-browser and cross-platform compatibility",
+        "Designed and implemented microservices patterns to support financial product workflows",
+        "Conducted A/B testing on user journeys, enabling data-driven decisions that increased adoption of digital banking features",
+        "Participated in SCRUM meetings, Sprint retrospectives, and product grooming sessions; tracked production issues via JIRA",
+      ],
+    },
+    {
+      id: 2,
+      company: "Bank of America",
+      title: "Release Manager",
+      start: "Oct 2020",
+      end: "Nov 2021",
+      location: "Charlotte, NC",
+      highlights: [
+        "Managed cross-functional Change Requests and Emergency Migration Requests for deployments across all environments",
+        "Oversaw Production Services including incident management, release/deployment, operational readiness, and application monitoring",
+        "Managed and approved CI/CD pipelines for lower-level and production environments",
+        "Performed security code reviews before production releases and triaged security vulnerabilities",
+        "Documented processes in Confluence; communicated across Dev, QA, and SysAdmin teams",
+      ],
+    },
+    {
+      id: 3,
+      company: "Bank of America",
+      title: "Production Services Lead",
+      start: "Sep 2019",
+      end: "Oct 2020",
+      location: "Charlotte, NC",
+      highlights: [
+        "Led deployment of artifacts to various environments in collaboration with development and operational teams",
+        "Triaged issues with SOC and problem management teams; created JIRA and Remedy tickets for all production issues",
+        "Provided application security best practice guidelines to development teams during build and release activities",
+        "Collaborated with developers and testers to achieve organizational goals and educate teams on the build process",
+      ],
+    },
+    {
+      id: 4,
+      company: "Insight Global LLC",
+      title: "Production Services Lead",
+      start: "Oct 2018",
+      end: "Sep 2019",
+      location: "Charlotte, NC",
+      highlights: [
+        "Provided in-depth security architecture support and ran day-to-day operations of the technology platform",
+        "Identified production failure scenarios and created incident/problem tickets in JIRA",
+        "Triaged security issues; collaborated with development and business operations teams to identify vulnerabilities",
+        "Created JIRA and Remedy tickets for lower-level and production environments",
+      ],
+    },
+    {
+      id: 5,
+      company: "Tata Consultancy Services",
+      title: "Sr. DevOps Engineer",
+      start: "Jun 2018",
+      end: "Oct 2018",
+      location: "Cincinnati, OH",
+      highlights: [
+        "Built and maintained CI/CD pipelines for Angular and .NET projects across the bank",
+        "Used Qualys VM tools for application security scans and remediation",
+        "Implemented branching and build/release strategies with SVN/GIT; led migration from SVN to GIT",
+        "Deployed EAR/WAR archives to WebLogic and Apache servers; automated deployments using Groovy scripts in Jenkins",
+        "Integrated Jenkins with Artifactory and JFrog; configured JIRA as the defect tracking system",
+      ],
+    },
+    {
+      id: 6,
+      company: "Diversant LLC",
+      title: "Sr. DevOps Engineer",
+      start: "Oct 2017",
+      end: "Mar 2018",
+      location: "Charlotte, NC",
+      highlights: [
+        "Created and managed infrastructure for developers, testers, and DB administrators to enable automation",
+        "Configured Jenkins jobs to fetch source code from GIT and build WAR/EAR files with Maven",
+        "Automated deployments using Shell (Bash) and Groovy scripts; configured AWS VPC with public and private subnets",
+        "Created CI/CD pipelines for Angular projects; set up Jenkins nodes for parallel builds and load distribution",
+      ],
+    },
+    {
+      id: 7,
+      company: "Software Solutions Group",
+      title: "AWS DevOps Engineer",
+      start: "Sep 2012",
+      end: "Sep 2017",
+      location: "Atlanta, GA",
+      highlights: [
+        "Prepared and maintained Software Configuration Management (SCM) guides, release checklists, and deployment runbooks",
+        "Implemented Software Release Management strategies for Agile application releases",
+        "Created Jenkins jobs for continuous integration; managed GIT repositories, branching, and merging strategies",
+        "Deployed applications to Dev, QA, UAT, and Production environments; authored Shell scripts for automation",
+      ],
+    },
+  ],
+
+  education: [
+    {
+      id: 1,
+      institution: "UNC Charlotte",
+      degree: "Full Stack Web Development Certificate",
+      graduated: "2021",
+      highlights: ["MERN stack development", "Agile methodology", "Deployed production-grade full-stack applications"],
+    },
+    {
+      id: 2,
+      institution: "Harvard (Online)",
+      degree: "Product Management Certificate",
+      graduated: "2022",
+      highlights: ["Product roadmapping", "Stakeholder communication", "Data-driven decision making"],
+    },
+    {
+      id: 3,
+      institution: "University",
+      degree: "BSc Microbiology and Computer Applications",
+      graduated: "2012",
+      highlights: ["Computer science fundamentals", "Software development foundations"],
+    },
+  ],
+};
+
+module.exports = resume;
