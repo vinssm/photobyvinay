@@ -53,12 +53,18 @@ jobs:
       - name: Deploy to Azure Web App
         id: deploy
         run: |
-          # Extract credentials from publish profile using sed (more portable than grep -P)
+          # Extract credentials from publish profile using bash parameter expansion
           PUBLISH_PROFILE="${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
 
-          # Debug: verify credentials were extracted (remove before production)
+          # Extract userName
+          temp="${PUBLISH_PROFILE##*userName=\"}"
+          USERNAME="${temp%%\"*}"
+
+          # Extract userPWD
+          temp="${PUBLISH_PROFILE##*userPWD=\"}"
+          PASSWORD="${temp%%\"*}"
+
+          # Debug: verify credentials were extracted
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
             echo "Error: Failed to extract credentials from publish profile"
             echo "Profile length: ${#PUBLISH_PROFILE}"
@@ -100,10 +106,16 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile using sed (more portable than grep -P)
+          # Extract credentials from publish profile using bash parameter expansion
           PUBLISH_PROFILE="${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
+
+          # Extract userName
+          temp="${PUBLISH_PROFILE##*userName=\"}"
+          USERNAME="${temp%%\"*}"
+
+          # Extract userPWD
+          temp="${PUBLISH_PROFILE##*userPWD=\"}"
+          PASSWORD="${temp%%\"*}"
 
           # Debug: verify credentials were extracted
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
@@ -144,10 +156,16 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile using sed (more portable than grep -P)
+          # Extract credentials from publish profile using bash parameter expansion
           PUBLISH_PROFILE="${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
+
+          # Extract userName
+          temp="${PUBLISH_PROFILE##*userName=\"}"
+          USERNAME="${temp%%\"*}"
+
+          # Extract userPWD
+          temp="${PUBLISH_PROFILE##*userPWD=\"}"
+          PASSWORD="${temp%%\"*}"
 
           # Debug: verify credentials were extracted
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
