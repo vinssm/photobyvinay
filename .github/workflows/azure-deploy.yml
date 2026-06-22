@@ -53,10 +53,17 @@ jobs:
       - name: Deploy to Azure Web App
         id: deploy
         run: |
-          # Extract credentials from publish profile
+          # Extract credentials from publish profile using sed (more portable than grep -P)
           PUBLISH_PROFILE="${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
+
+          # Debug: verify credentials were extracted (remove before production)
+          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            echo "Profile length: ${#PUBLISH_PROFILE}"
+            exit 1
+          fi
 
           # Deploy using Kudu REST API
           curl -X POST -u "$USERNAME:$PASSWORD" \
@@ -93,10 +100,16 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile
+          # Extract credentials from publish profile using sed (more portable than grep -P)
           PUBLISH_PROFILE="${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
+
+          # Debug: verify credentials were extracted
+          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            exit 1
+          fi
 
           # Deploy using Kudu REST API
           curl -X POST -u "$USERNAME:$PASSWORD" \
@@ -131,10 +144,16 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile
+          # Extract credentials from publish profile using sed (more portable than grep -P)
           PUBLISH_PROFILE="${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}"
-          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
-          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+          USERNAME=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -1)
+
+          # Debug: verify credentials were extracted
+          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+            echo "Error: Failed to extract credentials from publish profile"
+            exit 1
+          fi
 
           # Deploy using Kudu REST API
           curl -X POST -u "$USERNAME:$PASSWORD" \
