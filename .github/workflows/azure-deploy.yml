@@ -53,21 +53,49 @@ jobs:
       - name: Deploy to Azure Web App
         id: deploy
         run: |
-          # Extract credentials from publish profile using bash parameter expansion
-          PUBLISH_PROFILE="${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}"
+          python3 << 'EOF'
+          import xml.etree.ElementTree as ET
+          import subprocess
+          import os
 
-          # Extract userName
-          temp="${PUBLISH_PROFILE##*userName=\"}"
-          USERNAME="${temp%%\"*}"
+          # Parse publish profile XML
+          profile_xml = os.environ['PUBLISH_PROFILE']
+          root = ET.fromstring(profile_xml)
 
-          # Extract userPWD
-          temp="${PUBLISH_PROFILE##*userPWD=\"}"
-          PASSWORD="${temp%%\"*}"
+          # Extract credentials from publishProfile element
+          for profile in root.findall('.//publishProfile'):
+              username = profile.get('userName')
+              password = profile.get('userPWD')
+              if username and password:
+                  print(f"USERNAME={username}")
+                  print(f"PASSWORD={password}")
+                  break
+          EOF
 
-          # Debug: verify credentials were extracted
+          # Run the Python script and capture output
+          creds=$(python3 << 'PYEOF'
+          import xml.etree.ElementTree as ET
+          import os
+
+          profile_xml = os.environ['PUBLISH_PROFILE']
+          root = ET.fromstring(profile_xml)
+
+          for profile in root.findall('.//publishProfile'):
+              username = profile.get('userName')
+              password = profile.get('userPWD')
+              if username and password:
+                  print(f"{username}:{password}")
+                  break
+          PYEOF
+          )
+
+          # Extract username and password from creds
+          USERNAME=$(echo "$creds" | cut -d: -f1)
+          PASSWORD=$(echo "$creds" | cut -d: -f2-)
+
+          # Debug: verify credentials
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials from publish profile"
-            echo "Profile length: ${#PUBLISH_PROFILE}"
+            echo "Error: Failed to extract credentials"
             exit 1
           fi
 
@@ -76,8 +104,10 @@ jobs:
             -H "Content-Type: application/zip" \
             --data-binary "@main-release.zip" \
             "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
-
+            
           echo "webapp-url=https://${{ vars.AZURE_MAIN_APP_NAME }}.azurewebsites.net" >> "$GITHUB_OUTPUT"
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Deploy Bio Service (Node.js/Express)
@@ -106,20 +136,28 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile using bash parameter expansion
-          PUBLISH_PROFILE="${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}"
+          creds=$(python3 << 'PYEOF'
+          import xml.etree.ElementTree as ET
+          import os
 
-          # Extract userName
-          temp="${PUBLISH_PROFILE##*userName=\"}"
-          USERNAME="${temp%%\"*}"
+          profile_xml = os.environ['PUBLISH_PROFILE']
+          root = ET.fromstring(profile_xml)
 
-          # Extract userPWD
-          temp="${PUBLISH_PROFILE##*userPWD=\"}"
-          PASSWORD="${temp%%\"*}"
+          for profile in root.findall('.//publishProfile'):
+              username = profile.get('userName')
+              password = profile.get('userPWD')
+              if username and password:
+                  print(f"{username}:{password}")
+                  break
+          PYEOF
+          )
 
-          # Debug: verify credentials were extracted
+          # Extract username and password
+          USERNAME=$(echo "$creds" | cut -d: -f1)
+          PASSWORD=$(echo "$creds" | cut -d: -f2-)
+
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials from publish profile"
+            echo "Error: Failed to extract credentials"
             exit 1
           fi
 
@@ -128,6 +166,8 @@ jobs:
             -H "Content-Type: application/zip" \
             --data-binary "@services/bio-service/bio-release.zip" \
             "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy Project Service (Python FastAPI)
@@ -156,20 +196,28 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          # Extract credentials from publish profile using bash parameter expansion
-          PUBLISH_PROFILE="${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}"
+          creds=$(python3 << 'PYEOF'
+          import xml.etree.ElementTree as ET
+          import os
 
-          # Extract userName
-          temp="${PUBLISH_PROFILE##*userName=\"}"
-          USERNAME="${temp%%\"*}"
+          profile_xml = os.environ['PUBLISH_PROFILE']
+          root = ET.fromstring(profile_xml)
 
-          # Extract userPWD
-          temp="${PUBLISH_PROFILE##*userPWD=\"}"
-          PASSWORD="${temp%%\"*}"
+          for profile in root.findall('.//publishProfile'):
+              username = profile.get('userName')
+              password = profile.get('userPWD')
+              if username and password:
+                  print(f"{username}:{password}")
+                  break
+          PYEOF
+          )
 
-          # Debug: verify credentials were extracted
+          # Extract username and password
+          USERNAME=$(echo "$creds" | cut -d: -f1)
+          PASSWORD=$(echo "$creds" | cut -d: -f2-)
+
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to extract credentials from publish profile"
+            echo "Error: Failed to extract credentials"
             exit 1
           fi
 
@@ -178,3 +226,5 @@ jobs:
             -H "Content-Type: application/zip" \
             --data-binary "@services/project-service/projects-release.zip" \
             "https://${{ vars.AZURE_PROJECTS_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
