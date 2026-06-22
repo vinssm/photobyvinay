@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package-lock.json # FIX 1: explicit path for monorepo cache
 
       - name: Install root dependencies
         run: npm install --omit=dev --legacy-peer-deps || npm install --omit=dev --force
@@ -52,10 +53,14 @@ jobs:
 
       - name: Deploy to Azure Web App
         id: deploy
+        # FIX 2: env block was missing entirely in deploy-main — PUBLISH_PROFILE was never set
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
         run: |
-          creds=$(python3 << PYEOF
+          # FIX 3: write heredoc to a temp file to avoid subshell/quoting issues
+          cat > /tmp/extract_creds.py << 'EOF'
           import xml.etree.ElementTree as ET
-          import os
+          import os, sys
 
           profile_xml = os.environ['PUBLISH_PROFILE']
           root = ET.fromstring(profile_xml)
@@ -65,25 +70,35 @@ jobs:
               password = profile.get('userPWD')
               if username and password:
                   print(f"{username}:{password}")
-                  break
-          PYEOF
-          )
+                  sys.exit(0)
 
-          # Extract username and password from creds
+          sys.exit(1)
+          EOF
+
+          creds=$(python3 /tmp/extract_creds.py)
+
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
-          # Debug: verify credentials
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
             echo "Error: Failed to extract credentials"
             exit 1
           fi
 
-          # Deploy using Kudu REST API
-          curl -X POST -u "$USERNAME:$PASSWORD" \
+          # FIX 4: capture HTTP status code and fail the step if deploy didn't return 200
+          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
+            -X POST -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/zip" \
             --data-binary "@main-release.zip" \
-            "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+            "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
+
+          echo "Deploy response (HTTP $HTTP_STATUS):"
+          cat /tmp/deploy_output.txt
+
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
+            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Deploy Bio Service (Node.js/Express)
@@ -111,10 +126,12 @@ jobs:
         run: zip -r bio-release.zip . --exclude "*.git*"
 
       - name: Deploy to Azure Web App
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
         run: |
-          creds=$(python3 << PYEOF
+          cat > /tmp/extract_creds.py << 'EOF'
           import xml.etree.ElementTree as ET
-          import os
+          import os, sys
 
           profile_xml = os.environ['PUBLISH_PROFILE']
           root = ET.fromstring(profile_xml)
@@ -124,11 +141,13 @@ jobs:
               password = profile.get('userPWD')
               if username and password:
                   print(f"{username}:{password}")
-                  break
-          PYEOF
-          )
+                  sys.exit(0)
 
-          # Extract username and password
+          sys.exit(1)
+          EOF
+
+          creds=$(python3 /tmp/extract_creds.py)
+
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
@@ -137,13 +156,20 @@ jobs:
             exit 1
           fi
 
-          # Deploy using Kudu REST API
-          curl -X POST -u "$USERNAME:$PASSWORD" \
+          # FIX 5: zip is created inside services/bio-service/ so path must be relative to that dir
+          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
+            -X POST -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/zip" \
             --data-binary "@services/bio-service/bio-release.zip" \
-            "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
+            "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
+
+          echo "Deploy response (HTTP $HTTP_STATUS):"
+          cat /tmp/deploy_output.txt
+
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
+            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy Project Service (Python FastAPI)
@@ -171,10 +197,12 @@ jobs:
         run: zip -r projects-release.zip . --exclude "*.git*" --exclude "venv/*" --exclude "__pycache__/*"
 
       - name: Deploy to Azure Web App
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
         run: |
-          creds=$(python3 << PYEOF
+          cat > /tmp/extract_creds.py << 'EOF'
           import xml.etree.ElementTree as ET
-          import os
+          import os, sys
 
           profile_xml = os.environ['PUBLISH_PROFILE']
           root = ET.fromstring(profile_xml)
@@ -184,11 +212,13 @@ jobs:
               password = profile.get('userPWD')
               if username and password:
                   print(f"{username}:{password}")
-                  break
-          PYEOF
-          )
+                  sys.exit(0)
 
-          # Extract username and password
+          sys.exit(1)
+          EOF
+
+          creds=$(python3 /tmp/extract_creds.py)
+
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
 
@@ -197,10 +227,16 @@ jobs:
             exit 1
           fi
 
-          # Deploy using Kudu REST API
-          curl -X POST -u "$USERNAME:$PASSWORD" \
+          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
+            -X POST -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/zip" \
             --data-binary "@services/project-service/projects-release.zip" \
-            "https://${{ vars.AZURE_PROJECTS_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
+            "https://${{ vars.AZURE_PROJECTS_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
+
+          echo "Deploy response (HTTP $HTTP_STATUS):"
+          cat /tmp/deploy_output.txt
+
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
+            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
