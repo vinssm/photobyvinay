@@ -53,27 +53,7 @@ jobs:
       - name: Deploy to Azure Web App
         id: deploy
         run: |
-          python3 << 'EOF'
-          import xml.etree.ElementTree as ET
-          import subprocess
-          import os
-
-          # Parse publish profile XML
-          profile_xml = os.environ['PUBLISH_PROFILE']
-          root = ET.fromstring(profile_xml)
-
-          # Extract credentials from publishProfile element
-          for profile in root.findall('.//publishProfile'):
-              username = profile.get('userName')
-              password = profile.get('userPWD')
-              if username and password:
-                  print(f"USERNAME={username}")
-                  print(f"PASSWORD={password}")
-                  break
-          EOF
-
-          # Run the Python script and capture output
-          creds=$(python3 << 'PYEOF'
+          creds=$(python3 << PYEOF
           import xml.etree.ElementTree as ET
           import os
 
@@ -104,10 +84,6 @@ jobs:
             -H "Content-Type: application/zip" \
             --data-binary "@main-release.zip" \
             "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
-            
-          echo "webapp-url=https://${{ vars.AZURE_MAIN_APP_NAME }}.azurewebsites.net" >> "$GITHUB_OUTPUT"
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Deploy Bio Service (Node.js/Express)
@@ -136,9 +112,7 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          creds=$(python3 << 'PYEOF'
-          import xml.etree.ElementTree as ET
-          import os
+          creds=$(python3 << PYEOF
 
           profile_xml = os.environ['PUBLISH_PROFILE']
           root = ET.fromstring(profile_xml)
@@ -196,7 +170,7 @@ jobs:
 
       - name: Deploy to Azure Web App
         run: |
-          creds=$(python3 << 'PYEOF'
+          creds=$(python3 << PYEOF
           import xml.etree.ElementTree as ET
           import os
 
