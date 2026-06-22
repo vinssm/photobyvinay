@@ -32,12 +32,12 @@ jobs:
           cache: npm
 
       - name: Install root dependencies
-        run: npm install --omit=dev
+        run: npm install --omit=dev --legacy-peer-deps || npm install --omit=dev --force
 
       - name: Install client dependencies and build
         working-directory: client
         run: |
-          npm install
+          npm install --legacy-peer-deps || npm install --force
           npm run build
 
       - name: Create deployment zip (excludes dev files)
@@ -58,11 +58,11 @@ jobs:
           publish-profile: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
           package: main-release.zip
 
-# ────────────────────────────────────────────────────────────────────────────────
-# JOB 2 — Deploy Bio Service (Node.js/Express)
-# Azure App Service name stored in: vars.AZURE_BIO_APP_NAME
-# Publish profile stored in:        secrets.AZURE_BIO_PUBLISH_PROFILE
-# ────────────────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Deploy Bio Service (Node.js/Express)
+  # Azure App Service name stored in: vars.AZURE_BIO_APP_NAME
+  # Publish profile stored in:        secrets.AZURE_BIO_PUBLISH_PROFILE
+  # ────────────────────────────────────────────────────────────────────────────────
   deploy-bio-service:
     name: Bio Service (Node.js)
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
 
       - name: Install bio service dependencies
         working-directory: services/bio-service
-        run: npm install --omit=dev
+        run: npm install --omit=dev --legacy-peer-deps || npm install --omit=dev --force
 
       - name: Create deployment zip
         working-directory: services/bio-service
@@ -90,11 +90,11 @@ jobs:
           publish-profile: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
           package: services/bio-service/bio-release.zip
 
-# ────────────────────────────────────────────────────────────────────────────────
-# JOB 3 — Deploy Project Service (Python FastAPI)
-# Azure App Service name stored in: vars.AZURE_PROJECTS_APP_NAME
-# Publish profile stored in:        secrets.AZURE_PROJECTS_PUBLISH_PROFILE
-# ────────────────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Deploy Project Service (Python FastAPI)
+  # Azure App Service name stored in: vars.AZURE_PROJECTS_APP_NAME
+  # Publish profile stored in:        secrets.AZURE_PROJECTS_PUBLISH_PROFILE
+  # ────────────────────────────────────────────────────────────────────────────────
   deploy-project-service:
     name: Project Service (Python FastAPI)
     runs-on: ubuntu-latest
