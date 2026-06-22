@@ -52,11 +52,19 @@ jobs:
 
       - name: Deploy to Azure Web App
         id: deploy
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ vars.AZURE_MAIN_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
-          package: main-release.zip
+        run: |
+          # Extract credentials from publish profile
+          PUBLISH_PROFILE="${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}"
+          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+
+          # Deploy using Kudu REST API
+          curl -X POST -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@main-release.zip" \
+            "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+
+          echo "webapp-url=https://${{ vars.AZURE_MAIN_APP_NAME }}.azurewebsites.net" >> "$GITHUB_OUTPUT"
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Deploy Bio Service (Node.js/Express)
@@ -84,11 +92,17 @@ jobs:
         run: zip -r bio-release.zip . --exclude "*.git*"
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ vars.AZURE_BIO_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
-          package: services/bio-service/bio-release.zip
+        run: |
+          # Extract credentials from publish profile
+          PUBLISH_PROFILE="${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}"
+          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+
+          # Deploy using Kudu REST API
+          curl -X POST -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@services/bio-service/bio-release.zip" \
+            "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy Project Service (Python FastAPI)
@@ -116,8 +130,14 @@ jobs:
         run: zip -r projects-release.zip . --exclude "*.git*" --exclude "venv/*" --exclude "__pycache__/*"
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ vars.AZURE_PROJECTS_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
-          package: services/project-service/projects-release.zip
+        run: |
+          # Extract credentials from publish profile
+          PUBLISH_PROFILE="${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}"
+          USERNAME=$(echo "$PUBLISH_PROFILE" | grep -oP 'userName="\K[^"]+' | head -1)
+          PASSWORD=$(echo "$PUBLISH_PROFILE" | grep -oP 'userPWD="\K[^"]+' | head -1)
+
+          # Deploy using Kudu REST API
+          curl -X POST -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@services/project-service/projects-release.zip" \
+            "https://${{ vars.AZURE_PROJECTS_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
