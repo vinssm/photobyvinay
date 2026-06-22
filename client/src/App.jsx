@@ -5,8 +5,6 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { Provider } from "react-redux";
-import store from "./store/index.js";
 import NavBar from "./components/NavBar.jsx";
 import ToastContainer from "./components/ToastContainer.jsx";
 import About from "./pages/About.jsx";
@@ -49,38 +47,32 @@ const client = new ApolloClient({
 
 function App() {
   return (
-    <Provider store={store}>
-      <ApolloProvider client={client}>
-        <Router>
-          <>
-            <NavBar />
-            <ToastContainer />
-            <Routes>
-              <Route exact path="/" element={<Home />} />
-              <Route exact path="/login" element={<Login />} />
-              <Route exact path="/Home" element={<Home />} />
-              <Route exact path="/about" element={<About />} />
-              <Route exact path="/services" element={<Services />} />
-              <Route exact path="/profile" element={<Profile />} />
-              <Route exact path="/contact" element={<Contact />} />
-              <Route
-                exact
-                path="/photo-gallery"
-                element={<PhotoGalleryPage />}
-              />
-              {/* <Route exact path='/' component={SearchComments} />
-          <Route exact path='/SavedComments' component={SavedComments} /> */}
-              <Route exact path="/portfolio" element={<Portfolio />} />
-              <Route exact path="/signup" element={<Signup />} />
-              <Route
-                path="*"
-                element={<h1 className="display-4">Something went Wrong!</h1>}
-              />
-            </Routes>
-          </>
-        </Router>
-      </ApolloProvider>
-    </Provider>
+    <ApolloProvider client={client}>
+      <Router>
+        <>
+          <NavBar />
+          <ToastContainer />
+          <Routes>
+            <Route exact path="/" element={<Home />} />
+            <Route exact path="/login" element={<Login />} />
+            <Route exact path="/Home" element={<Home />} />
+            <Route exact path="/about" element={<About />} />
+            <Route exact path="/services" element={<Services />} />
+            <Route exact path="/profile" element={<Profile />} />
+            <Route exact path="/contact" element={<Contact />} />
+            <Route exact path="/photo-gallery" element={<PhotoGalleryPage />} />
+            {/* <Route exact path='/' component={SearchComments} />
+        <Route exact path='/SavedComments' component={SavedComments} /> */}
+            <Route exact path="/portfolio" element={<Portfolio />} />
+            <Route exact path="/signup" element={<Signup />} />
+            <Route
+              path="*"
+              element={<h1 className="display-4">Something went Wrong!</h1>}
+            />
+          </Routes>
+        </>
+      </Router>
+    </ApolloProvider>
   );
 }
 
