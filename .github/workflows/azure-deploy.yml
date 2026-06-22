@@ -113,10 +113,12 @@ jobs:
       - name: Deploy to Azure Web App
         run: |
           creds=$(python3 << PYEOF
-
+          import xml.etree.ElementTree as ET
+          import os
+          
           profile_xml = os.environ['PUBLISH_PROFILE']
           root = ET.fromstring(profile_xml)
-
+          
           for profile in root.findall('.//publishProfile'):
               username = profile.get('userName')
               password = profile.get('userPWD')
@@ -125,14 +127,23 @@ jobs:
                   break
           PYEOF
           )
-
+          
           # Extract username and password
           USERNAME=$(echo "$creds" | cut -d: -f1)
           PASSWORD=$(echo "$creds" | cut -d: -f2-)
-
+          
           if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
             echo "Error: Failed to extract credentials"
             exit 1
+          fi
+          
+          # Deploy using Kudu REST API
+          curl -X POST -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@services/bio-service/bio-release.zip" \
+            "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy"
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
           fi
 
           # Deploy using Kudu REST API
