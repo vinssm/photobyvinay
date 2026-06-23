@@ -4,7 +4,7 @@
   "description": "photobyvinay",
   "main": "server/server.js",
   "engines": {
-    "node": "14.x"
+    "node": "20.x"
   },
   "scripts": {
     "start": "node server/server.js",
@@ -22,9 +22,11 @@
   "author": "Vinay",
   "license": "ISC",
   "dependencies": {
+    "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
     "bcryptjs": "^3.0.3",
     "express": "^5.1.0",
+    "http-proxy-middleware": "^4.1.1",
     "if-env": "^1.0.4",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.3",

@@ -53,59 +53,11 @@ jobs:
 
       - name: Deploy to Azure Web App
         id: deploy
-        run: |
-          # Extract credentials from publish profile using Python
-          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
-          import xml.etree.ElementTree as ET
-          import sys
-
-          if len(sys.argv) < 2:
-              print("Error: No publish profile provided")
-              sys.exit(1)
-
-          profile_xml = sys.argv[1]
-          try:
-              root = ET.fromstring(profile_xml)
-
-          for profile in root.findall('.//publishProfile'):
-              username = profile.get('userName')
-              password = profile.get('userPWD')
-              if username and password:
-                  print(f"{username}:{password}")
-                  sys.exit(0)
-          except Exception as e:
-              print(f"Error parsing XML: {e}")
-              sys.exit(1)
-          EOFSCRIPT
-
-          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}")
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to extract credentials from publish profile"
-            exit 1
-          fi
-
-          USERNAME=$(echo "$creds" | cut -d: -f1)
-          PASSWORD=$(echo "$creds" | cut -d: -f2-)
-
-          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to parse credentials"
-            exit 1
-          fi
-
-          # Deploy using Kudu REST API with HTTP status checking
-          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
-            -X POST -u "$USERNAME:$PASSWORD" \
-            -H "Content-Type: application/zip" \
-            --data-binary "@main-release.zip" \
-            "https://${{ vars.AZURE_MAIN_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
-
-          echo "Deploy response (HTTP $HTTP_STATUS):"
-          cat /tmp/deploy_output.txt
-
-          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
-            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
-            exit 1
-          fi
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_MAIN_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
+          package: main-release.zip
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 2 — Deploy Bio Service (Node.js/Express)
@@ -133,56 +85,11 @@ jobs:
         run: zip -r bio-release.zip . --exclude "*.git*"
 
       - name: Deploy to Azure Web App
-        run: |
-          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
-          import xml.etree.ElementTree as ET
-          import sys
-
-          if len(sys.argv) < 2:
-              print("Error: No publish profile provided")
-              sys.exit(1)
-
-          profile_xml = sys.argv[1]
-          try:
-              root = ET.fromstring(profile_xml)
-              for profile in root.findall('.//publishProfile'):
-                  username = profile.get('userName')
-                  password = profile.get('userPWD')
-                  if username and password:
-                      print(f"{username}:{password}")
-                      sys.exit(0)
-          except Exception as e:
-              print(f"Error parsing XML: {e}")
-              sys.exit(1)
-          EOFSCRIPT
-
-          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}")
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to extract credentials from publish profile"
-            exit 1
-          fi
-
-          USERNAME=$(echo "$creds" | cut -d: -f1)
-          PASSWORD=$(echo "$creds" | cut -d: -f2-)
-
-          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to parse credentials"
-            exit 1
-          fi
-
-          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
-            -X POST -u "$USERNAME:$PASSWORD" \
-            -H "Content-Type: application/zip" \
-            --data-binary "@services/bio-service/bio-release.zip" \
-            "https://${{ vars.AZURE_BIO_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
-
-          echo "Deploy response (HTTP $HTTP_STATUS):"
-          cat /tmp/deploy_output.txt
-
-          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
-            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
-            exit 1
-          fi
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_BIO_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
+          package: services/bio-service/bio-release.zip
 
   # ────────────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy Project Service (Python FastAPI)
@@ -210,53 +117,8 @@ jobs:
         run: zip -r projects-release.zip . --exclude "*.git*" --exclude "venv/*" --exclude "__pycache__/*"
 
       - name: Deploy to Azure Web App
-        run: |
-          cat > /tmp/extract_creds.py << 'EOFSCRIPT'
-          import xml.etree.ElementTree as ET
-          import sys
-
-          if len(sys.argv) < 2:
-              print("Error: No publish profile provided")
-              sys.exit(1)
-
-          profile_xml = sys.argv[1]
-          try:
-              root = ET.fromstring(profile_xml)
-              for profile in root.findall('.//publishProfile'):
-                  username = profile.get('userName')
-                  password = profile.get('userPWD')
-                  if username and password:
-                      print(f"{username}:{password}")
-                      sys.exit(0)
-          except Exception as e:
-              print(f"Error parsing XML: {e}")
-              sys.exit(1)
-          EOFSCRIPT
-
-          creds=$(python3 /tmp/extract_creds.py "${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}")
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to extract credentials from publish profile"
-            exit 1
-          fi
-
-          USERNAME=$(echo "$creds" | cut -d: -f1)
-          PASSWORD=$(echo "$creds" | cut -d: -f2-)
-
-          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-            echo "Error: Failed to parse credentials"
-            exit 1
-          fi
-
-          HTTP_STATUS=$(curl -s -o /tmp/deploy_output.txt -w "%{http_code}" \
-            -X POST -u "$USERNAME:$PASSWORD" \
-            -H "Content-Type: application/zip" \
-            --data-binary "@services/project-service/projects-release.zip" \
-            "https://${{ vars.AZURE_PROJECTS_APP_NAME }}.scm.azurewebsites.net/api/zipdeploy")
-
-          echo "Deploy response (HTTP $HTTP_STATUS):"
-          cat /tmp/deploy_output.txt
-
-          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "202" ]; then
-            echo "Error: Deployment failed with HTTP $HTTP_STATUS"
-            exit 1
-          fi
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_PROJECTS_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
+          package: services/project-service/projects-release.zip
