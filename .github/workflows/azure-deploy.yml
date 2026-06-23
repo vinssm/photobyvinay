@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
   PYTHON_VERSION: "3.11"
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -18,19 +18,35 @@ jobs:
   deploy-main:
     name: Main App (Express + React)
     runs-on: ubuntu-latest
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      MAIN_PUBLISH_PROFILE: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
     environment:
       name: production
       url: ${{ steps.deploy.outputs.webapp-url }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: package-lock.json # FIX 1: explicit path for monorepo cache
+
+      - name: Validate Azure credentials are configured
+        run: |
+          if [ -z "$MAIN_PUBLISH_PROFILE" ] && [ -z "$AZURE_CREDENTIALS" ]; then
+            echo "Missing credentials: set AZURE_MAIN_PUBLISH_PROFILE or AZURE_CREDENTIALS in GitHub Secrets."
+            exit 1
+          fi
+
+      - name: Azure Login (service principal fallback)
+        if: env.MAIN_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v2
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Install root dependencies
         run: npm install --omit=dev --legacy-peer-deps || npm install --omit=dev --force
@@ -56,7 +72,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ vars.AZURE_MAIN_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_MAIN_PUBLISH_PROFILE }}
+          publish-profile: ${{ env.MAIN_PUBLISH_PROFILE }}
           package: main-release.zip
 
   # ────────────────────────────────────────────────────────────────────────────────
@@ -67,14 +83,30 @@ jobs:
   deploy-bio-service:
     name: Bio Service (Node.js)
     runs-on: ubuntu-latest
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      BIO_PUBLISH_PROFILE: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Validate Azure credentials are configured
+        run: |
+          if [ -z "$BIO_PUBLISH_PROFILE" ] && [ -z "$AZURE_CREDENTIALS" ]; then
+            echo "Missing credentials: set AZURE_BIO_PUBLISH_PROFILE or AZURE_CREDENTIALS in GitHub Secrets."
+            exit 1
+          fi
+
+      - name: Azure Login (service principal fallback)
+        if: env.BIO_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v2
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Install bio service dependencies
         working-directory: services/bio-service
@@ -88,7 +120,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ vars.AZURE_BIO_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_BIO_PUBLISH_PROFILE }}
+          publish-profile: ${{ env.BIO_PUBLISH_PROFILE }}
           package: services/bio-service/bio-release.zip
 
   # ────────────────────────────────────────────────────────────────────────────────
@@ -99,9 +131,25 @@ jobs:
   deploy-project-service:
     name: Project Service (Python FastAPI)
     runs-on: ubuntu-latest
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      PROJECTS_PUBLISH_PROFILE: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      - name: Validate Azure credentials are configured
+        run: |
+          if [ -z "$PROJECTS_PUBLISH_PROFILE" ] && [ -z "$AZURE_CREDENTIALS" ]; then
+            echo "Missing credentials: set AZURE_PROJECTS_PUBLISH_PROFILE or AZURE_CREDENTIALS in GitHub Secrets."
+            exit 1
+          fi
+
+      - name: Azure Login (service principal fallback)
+        if: env.PROJECTS_PUBLISH_PROFILE == '' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v2
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -120,5 +168,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ vars.AZURE_PROJECTS_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PROJECTS_PUBLISH_PROFILE }}
+          publish-profile: ${{ env.PROJECTS_PUBLISH_PROFILE }}
           package: services/project-service/projects-release.zip
